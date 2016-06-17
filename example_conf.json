@@ -1,0 +1,24 @@
+{
+  "log_dir": "log",
+  "debug": true,
+  "connections": [
+    {
+      "name": "main",
+      "class": "DataPool\\Connections\\DatabaseConnection",
+      "mapper_path": "",
+      "database": {
+        "driver": "pgsql",
+        "dbname": "test2",
+        "host": "192.168.0.21",
+        "username": "genobase",
+        "password": "genobase",
+        "port": 5432
+      },
+      "logger": {
+        "level": "DEBUG",
+        "title": "main.log",
+        "max_logfile": 5
+      }
+    }
+  ]
+}
