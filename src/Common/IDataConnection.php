@@ -18,17 +18,13 @@ interface IDataConnection
     public function getName();
 
     /**
-     * @param string $name
-     * @return IDataConnection
-     */
-    public function setName($name);
-
-    /**
+     * Called before each getConnection().
      * @return mixed
      */
     public function connect();
 
     /**
+     * Called before first connect.
      * @param array $config
      * @return IDataConnection
      */

@@ -11,6 +11,7 @@ namespace DataPool\Mappers;
 
 use DataPool\Common\IDataConnection;
 use DataPool\Common\IDataMapper;
+use DataPool\Utils\Pagination;
 
 abstract class ArrayMapper implements IDataMapper
 {
@@ -79,113 +80,164 @@ abstract class ArrayMapper implements IDataMapper
     }
 
     /**
-     * @param $name
      * @param $select
      * @param $where
      * @return mixed
      */
-    public function select($name, $select, $where)
+    public function select($select = null, $where = null)
     {
         if ($this->getContext()) {
-            //TODO
+            $page = isset($this->context['page']) ? $this->context['page'] : null;
+            $pageSize = isset($this->context['page_size']) ? $this->context['page_size'] : 100;
+            $topage = isset($this->context['to_page']) ? $this->context['to_page'] : null;
+            if ($page) {
+                $p = Pagination::createFromPage($page, $pageSize, $topage);
+                if (is_null($where)) {
+                    $where = ['PAGE'=>$p];
+                } else {
+                    $where['PAGE'] = $p;
+                }
+            }
         }
-        $re = $this->connnection->getEngine()->select($name, $select, $where);
+        $re = $this->connnection->getEngine()->select($this->getTableName(), $select, $where);
         $this->setContext(null);
         return $re;
     }
 
     /**
-     * @param $name
+     * @param $key
      * @param $select
      * @param $where
      * @return mixed
      */
-    public function get($name, $select, $where)
+    public function get($key, $select = null, $where = null)
     {
-        if ($this->getContext()) {
-            //TODO
+        if (is_array($where)) {
+            $where['KEY'] = $this->getTableKey();
+            $where['KEYDATA'] = $key;
+        } else {
+            $where = ['KEY'=>$this->getTableKey(), 'KEYDATA'=>$key];
         }
-        $re = $this->connnection->getEngine()->get($name, $select, $where);
+        $re = $this->connnection->getEngine()->get($this->getTableName(), $select, $where);
         $this->setContext(null);
         return $re;
     }
 
     /**
-     * @param $name
      * @param $data
      * @return mixed
      */
-    public function insert($name, $data)
+    public function insert($data)
     {
-        if ($this->getContext()) {
-            //TODO
-        }
-        $re = $this->connnection->getEngine()->insert($name, $data);
+        $re = $this->connnection->getEngine()->insert($this->getTableName(), $data);
         $this->setContext(null);
         return $re;
     }
 
     /**
-     * @param $name
      * @param $data
      * @param $where
      * @return mixed
      */
-    public function update($name, $data, $where)
+    public function update($data, $where)
     {
-        if ($this->getContext()) {
-            //TODO
-        }
-        $re = $this->connnection->getEngine()->update($name, $data, $where);
+        $re = $this->connnection->getEngine()->update($this->getTableName(), $data, $where);
         $this->setContext(null);
         return $re;
     }
 
     /**
-     * @param $name
+     * @param $key
      * @param $where
      * @return mixed
      */
-    public function delete($name, $where)
+    public function delete($key, $where = null)
     {
-        if ($this->getContext()) {
-            //TODO
+        if ($key) {
+            $where = ['KEY' => $this->getTableKey(), 'KEYDATA'=>$key];
         }
-        $re = $this->connnection->getEngine()->delete($name, $where);
+        $re = $this->connnection->getEngine()->delete($this->getTableName(), $where);
         $this->setContext(null);
         return $re;
     }
 
     /**
-     * @param $name
      * @param $where
      * @return bool
      */
-    public function has($name, $where)
+    public function has($where)
     {
-        if ($this->getContext()) {
-            //TODO
-        }
-        $re = $this->connnection->getEngine()->has($name, $where);
+        $re = $this->connnection->getEngine()->has($this->getTableName(), $where);
         $this->setContext(null);
         return $re;
     }
 
     /**
-     * @param $name
      * @param $select
      * @param $where
      * @return int
      */
-    public function count($name, $select, $where)
+    public function count($select = null, $where = null)
     {
-        if ($this->getContext()) {
-            //TODO
-        }
-        $re = $this->connnection->getEngine()->count($name, $select, $where);
+        $re = $this->connnection->getEngine()->count($this->getTableName(), $select, $where);
         $this->setContext(null);
         return $re;
     }
 
+    /**
+     * @param $term
+     * @param $select
+     * @param array $fields
+     * @return mixed
+     */
+    public function search($term, $select = null, $fields = [])
+    {
+        $where = [];
+        if ($this->getContext()) {
+            $page = isset($this->context['page']) ? $this->context['page'] : null;
+            $pageSize = isset($this->context['page_size']) ? $this->context['page_size'] : 100;
+            $topage = isset($this->context['to_page']) ? $this->context['to_page'] : null;
+            if ($page) {
+                $p = Pagination::createFromPage($page, $pageSize, $topage);
+                $where['PAGE'] = $p;
+            }
+        }
+        $where['KEYDATA'] = $term;
+        if ($fields) {
+            $where['FIELDS'] = $fields;
+        } else {
+            $where['FIELDS'] = $this->getTableKey();
+        }
+        $re = $this->connnection->getEngine()->select($this->getTableName(), $select, $where);
+        $this->setContext(null);
+        return $re;
+    }
+
+    /**
+     * @return string
+     */
+    protected function getTableName()
+    {
+        if (property_exists($this, 'name') && $this->name) {
+            return $this->name;
+        }
+        $clsname = get_class($this);
+        $sindex = strrpos($clsname, '\\');
+        if ($sindex !== false) {
+            $clsname = substr($clsname, $sindex + 1);
+        }
+        return strtolower($clsname);
+    }
+
+    /**
+     * @return array|string
+     */
+    protected function getTableKey()
+    {
+        if (property_exists($this, 'key') && $this->key) {
+            return $this->key;
+        }
+        return '';
+    }
 
 }

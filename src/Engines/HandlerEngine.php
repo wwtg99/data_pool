@@ -58,17 +58,18 @@ abstract class HandlerEngine implements IDataEngine
     {
         if (array_key_exists($name, $this->handlers)) {
             $f = $this->handlers[$name];
+            $context = ['event'=>$name, 'class'=>get_class($this)];
             if (is_array($f)) {
                 foreach ($f as $item) {
                     if (is_callable($item)) {
-                        $data = $item($data);
+                        $data = $item($data, $context);
                     }
                 }
                 return $data;
             } elseif (is_callable($f)) {
-                return $f($data);
+                return $f($data, $context);
             }
         }
-        return null;
+        return $data;
     }
 }

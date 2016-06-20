@@ -40,55 +40,58 @@ interface IDataMapper
     public function getKey();
 
     /**
-     * @param $name
      * @param $select
      * @param $where
      * @return mixed
      */
-    public function select($name, $select, $where);
+    public function select($select = null, $where = null);
 
     /**
-     * @param $name
+     * @param $key
      * @param $select
      * @param $where
      * @return mixed
      */
-    public function get($name, $select, $where);
+    public function get($key, $select = null, $where = null);
 
     /**
-     * @param $name
      * @param $data
      * @return mixed
      */
-    public function insert($name, $data);
+    public function insert($data);
 
     /**
-     * @param $name
      * @param $data
      * @param $where
      * @return mixed
      */
-    public function update($name, $data, $where);
+    public function update($data, $where);
 
     /**
-     * @param $name
+     * @param $key
      * @param $where
      * @return mixed
      */
-    public function delete($name, $where);
+    public function delete($key, $where = null);
 
     /**
-     * @param $name
      * @param $where
      * @return bool
      */
-    public function has($name, $where);
+    public function has($where);
 
     /**
-     * @param $name
      * @param $select
      * @param $where
      * @return int
      */
-    public function count($name, $select, $where);
+    public function count($select = null, $where = null);
+
+    /**
+     * @param $term
+     * @param $select
+     * @param array $fields
+     * @return mixed
+     */
+    public function search($term, $select = null, $fields = []);
 }

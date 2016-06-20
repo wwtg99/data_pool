@@ -10,6 +10,8 @@ namespace DataPool\Engines;
 
 
 use DataPool\Common\IDataEngine;
+use DataPool\Common\Message;
+use DataPool\Utils\Pagination;
 
 class MedooEngine extends HandlerEngine
 {
@@ -52,6 +54,10 @@ class MedooEngine extends HandlerEngine
     public function select($name, $select, $where)
     {
         $tb = $this->formatTable($name);
+        $where = $this->formatPage($this->formatKey($where));
+        if (is_null($select)) {
+            $select = '*';
+        }
         if (count($tb) == 2) {
             $re = $this->medoo->select($tb[0], $tb[1], $select, $where);
         } else {
@@ -59,10 +65,10 @@ class MedooEngine extends HandlerEngine
         }
         $this->last_sql = $this->medoo->getLastSql();
         $this->last_error = $this->medoo->getLastError();
-        if ($re === false) {
-
-        }
         $re = $this->handle('select', $re);
+        if ($re === false) {
+            return false;
+        }
         return $re;
     }
 
@@ -74,7 +80,20 @@ class MedooEngine extends HandlerEngine
      */
     public function get($name, $select, $where)
     {
-        // TODO: Implement get() method.
+        $tb = $this->formatTable($name);
+        $where = $this->formatKey($where);
+        if (count($tb) == 2) {
+            $re = $this->medoo->get($tb[0], $tb[1], $select, $where);
+        } else {
+            $re = $this->medoo->get($tb[0], $select, $where);
+        }
+        $this->last_sql = $this->medoo->getLastSql();
+        $this->last_error = $this->medoo->getLastError();
+        $re = $this->handle('get', $re);
+        if ($re === false) {
+            return false;
+        }
+        return $re;
     }
 
     /**
@@ -84,7 +103,14 @@ class MedooEngine extends HandlerEngine
      */
     public function insert($name, $data)
     {
-        // TODO: Implement insert() method.
+        $re = $this->medoo->insert($name, $data);
+        $this->last_sql = $this->medoo->getLastSql();
+        $this->last_error = $this->medoo->getLastError();
+        $re = $this->handle('insert', $re);
+        if ($re === false) {
+            return false;
+        }
+        return $re;
     }
 
     /**
@@ -95,7 +121,14 @@ class MedooEngine extends HandlerEngine
      */
     public function update($name, $data, $where)
     {
-        // TODO: Implement update() method.
+        $re = $this->medoo->update($name, $data, $where);
+        $this->last_sql = $this->medoo->getLastSql();
+        $this->last_error = $this->medoo->getLastError();
+        $re = $this->handle('update', $re);
+        if ($re === false) {
+            return false;
+        }
+        return $re;
     }
 
     /**
@@ -105,7 +138,15 @@ class MedooEngine extends HandlerEngine
      */
     public function delete($name, $where)
     {
-        // TODO: Implement delete() method.
+        $where = $this->formatKey($where);
+        $re = $this->medoo->delete($name, $where);
+        $this->last_sql = $this->medoo->getLastSql();
+        $this->last_error = $this->medoo->getLastError();
+        $re = $this->handle('delete', $re);
+        if ($re === false) {
+            return false;
+        }
+        return $re;
     }
 
     /**
@@ -115,7 +156,19 @@ class MedooEngine extends HandlerEngine
      */
     public function has($name, $where)
     {
-        // TODO: Implement has() method.
+        $tb = $this->formatTable($name);
+        if (count($tb) == 2) {
+            $re = $this->medoo->has($tb[0], $tb[1], $where);
+        } else {
+            $re = $this->medoo->has($tb[0], $where);
+        }
+        $this->last_sql = $this->medoo->getLastSql();
+        $this->last_error = $this->medoo->getLastError();
+        $re = $this->handle('has', $re);
+        if ($re === false) {
+            return false;
+        }
+        return $re;
     }
 
     /**
@@ -126,7 +179,19 @@ class MedooEngine extends HandlerEngine
      */
     public function count($name, $select, $where)
     {
-        // TODO: Implement count() method.
+        $tb = $this->formatTable($name);
+        if (count($tb) == 2) {
+            $re = $this->medoo->count($tb[0], $tb[1], $select, $where);
+        } else {
+            $re = $this->medoo->count($tb[0], $where);
+        }
+        $this->last_sql = $this->medoo->getLastSql();
+        $this->last_error = $this->medoo->getLastError();
+        $re = $this->handle('count', $re);
+        if ($re === false) {
+            return false;
+        }
+        return $re;
     }
 
     /**
@@ -147,6 +212,9 @@ class MedooEngine extends HandlerEngine
         } else {
             $re = $this->medoo->query($query);
         }
+        $this->last_sql = $this->medoo->getLastSql();
+        $this->last_error = $this->medoo->getLastError();
+        $re = $this->handle('query', $re);
         return $re;
     }
 
@@ -197,12 +265,103 @@ class MedooEngine extends HandlerEngine
         return $this->medoo->getLastSql();
     }
 
+    /**
+     * @param array $where
+     * @return array
+     * @throws \Exception
+     */
+    protected function formatKey($where)
+    {
+        if (array_key_exists('KEY', $where)) {
+            $key = $where['KEY'];
+            unset($where['KEY']);
+        }
+        if (array_key_exists('KEYDATA', $where)) {
+            $keydata = $where['KEYDATA'];
+            unset($where['KEYDATA']);
+        }
+        if (array_key_exists('FIELDS', $where)) {
+            $fields = $where['FIELDS'];
+            unset($where['FIELDS']);
+        }
+        if (isset($key) && isset($keydata)) {
+            if (is_array($key) && is_array($keydata)) {
+                foreach ($key as $k) {
+                    if (!array_key_exists($k, $keydata)) {
+                        $keydata[$k] = null;
+                    }
+                }
+                $where['AND'] = $keydata;
+            } elseif (is_string($key)) {
+                $where['AND'] = [$key => $keydata];
+            } else {
+                $msg = Message::messageList(5);
+                throw $msg->getException();
+            }
+        } elseif (isset($fields) && isset($keydata)) {
+            $wh = $this->formatSearch($fields, $keydata);
+            $where['OR'] = $wh;
+        }
+        return $where;
+    }
+
+    /**
+     * @param array|string $fields
+     * @param array|string $data
+     * @return array
+     */
+    protected function formatSearch($fields, $data)
+    {
+        if (is_array($fields)) {
+            if (is_array($data)) {
+                $wh = [];
+                foreach ($data as $d) {
+                    array_push($wh, $this->formatSearch($fields, $d));
+                }
+                return $wh;
+            } else {
+                $wh = [];
+                foreach ($fields as $field) {
+                    $f = $field . '[~]';
+                    $wh[$f] = $data;
+                }
+                return $wh;
+            }
+        } else {
+            $f = $fields . '[~]';
+            if (is_array($data)) {
+                $wh = [];
+                foreach ($data as $d) {
+                    $wh[$f] = $d;
+                }
+                return $wh;
+            } else {
+                return [$f => $data];
+            }
+        }
+    }
+
+    /**
+     * @param $where
+     * @return array
+     */
+    protected function formatPage($where)
+    {
+        if (isset($where['PAGE'])) {
+            $page = $where['PAGE'];
+            if ($page instanceof Pagination) {
+                $where['LIMIT'] = [$page->getOffset(), $page->getLimit()];
+            }
+            unset($where['PAGE']);
+        }
+        return $where;
+    }
 
     /**
      * @param string|array $name
      * @return array
      */
-    private function formatTable($name)
+    protected function formatTable($name)
     {
         if (is_array($name)) {
             $table = $name['table'];

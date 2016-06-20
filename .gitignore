@@ -1,0 +1,6 @@
+.*
+!.gitignore
+/vendor
+composer.lock
+php_errors.log
+/log

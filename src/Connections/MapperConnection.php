@@ -63,16 +63,6 @@ abstract class MapperConnection implements IDataConnection
 
     /**
      * @param string $name
-     * @return IDataConnection
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @param string $name
      * @return IDataMapper
      */
     public function getMapper($name)
@@ -120,7 +110,7 @@ abstract class MapperConnection implements IDataConnection
     public function init($config)
     {
         if (array_key_exists('name', $config)) {
-            $this->setName($config['name']);
+            $this->name = $config['name'];
         } else {
             $msg = Message::messageList(3);
             throw $msg->getException();

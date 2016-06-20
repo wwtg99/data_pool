@@ -45,15 +45,24 @@ class DatabaseConnection extends MapperConnection
             $this->engine->init($config);
         }
         $debug = $this->debug;
-        $log_func = function($data) use ($debug)  {
+        $log_func = function($data, $context) use ($debug)  {
             if ($data === false) {
-                $this->logger->error('Error for query ' . $this->engine->getLastQuery(), $this->engine->getLastError());
+                $context['error'] = $this->engine->getLastError();
+                $this->logger->error('Error for query ' . $this->engine->getLastQuery(), $context);
             }
             if ($debug) {
-                $this->logger->info('Query ' . $this->engine->getLastQuery());
+                $this->logger->info('Query ' . $this->engine->getLastQuery(), $context);
             }
+            return $data;
         };
         $this->engine->registerHandler('select', $log_func);
+        $this->engine->registerHandler('get', $log_func);
+        $this->engine->registerHandler('insert', $log_func);
+        $this->engine->registerHandler('update', $log_func);
+        $this->engine->registerHandler('delete', $log_func);
+        $this->engine->registerHandler('has', $log_func);
+        $this->engine->registerHandler('count', $log_func);
+        $this->engine->registerHandler('query', $log_func);
         return $this;
     }
 
