@@ -272,15 +272,15 @@ class MedooEngine extends HandlerEngine
      */
     protected function formatKey($where)
     {
-        if (array_key_exists('KEY', $where)) {
+        if (isset($where['KEY'])) {
             $key = $where['KEY'];
             unset($where['KEY']);
         }
-        if (array_key_exists('KEYDATA', $where)) {
+        if (isset($where['KEYDATA'])) {
             $keydata = $where['KEYDATA'];
             unset($where['KEYDATA']);
         }
-        if (array_key_exists('FIELDS', $where)) {
+        if (isset($where['FIELDS'])) {
             $fields = $where['FIELDS'];
             unset($where['FIELDS']);
         }
