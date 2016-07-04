@@ -112,11 +112,13 @@ abstract class ArrayMapper implements IDataMapper
      */
     public function get($key, $select = null, $where = null)
     {
-        if (is_array($where)) {
-            $where['KEY'] = $this->getTableKey();
-            $where['KEYDATA'] = $key;
-        } else {
-            $where = ['KEY'=>$this->getTableKey(), 'KEYDATA'=>$key];
+        if (!is_null($key)) {
+            if (is_array($where)) {
+                $where['KEY'] = $this->getTableKey();
+                $where['KEYDATA'] = $key;
+            } else {
+                $where = ['KEY' => $this->getTableKey(), 'KEYDATA' => $key];
+            }
         }
         $re = $this->connnection->getEngine()->get($this->getTableName(), $select, $where);
         $this->setContext(null);

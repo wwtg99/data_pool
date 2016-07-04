@@ -80,6 +80,9 @@ class MedooEngine extends HandlerEngine
      */
     public function get($name, $select, $where)
     {
+        if (is_null($select)) {
+            $select = '*';
+        }
         $tb = $this->formatTable($name);
         $where = $this->formatKey($where);
         if (count($tb) == 2) {
