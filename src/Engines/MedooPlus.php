@@ -6,7 +6,7 @@
  * Time: 19:40
  */
 
-namespace DataPool\Engines;
+namespace Wwtg99\DataPool\Engines;
 
 
 class MedooPlus extends \medoo
@@ -58,44 +58,23 @@ class MedooPlus extends \medoo
      */
     public function insert($table, $datas)
     {
-        // Check indexed or associative array
-        if (!isset($datas[ 0 ])) {
-            $datas = array($datas);
-        }
         $n = 0;
-        foreach ($datas as $data) {
-            $values = array();
-            $columns = array();
-            foreach ($data as $key => $value) {
-                array_push($columns, $this->column_quote($key));
-                switch (gettype($value)) {
-                    case 'NULL':
-                        $values[] = 'NULL';
-                        break;
-
-                    case 'array':
-                        preg_match("/\(JSON\)\s*([\w]+)/i", $key, $column_match);
-
-                        $values[] = isset($column_match[ 0 ]) ?
-                            $this->quote(json_encode($value)) :
-                            $this->quote(serialize($value));
-                        break;
-
-                    case 'boolean':
-                        $values[] = ($value ? '1' : '0');
-                        break;
-
-                    case 'integer':
-                    case 'double':
-                    case 'string':
-                        $values[] = $this->fn_quote($key, $value);
-                        break;
+        if (isset($datas[0])) {
+            foreach ($datas as $data) {
+                parent::insert($table, $data);
+                $this->lastSql = $this->last_query();
+                $this->lastError = $this->error();
+                if ($this->lastError[0] == '00000') {
+                    $n += 1;
                 }
             }
-            $re = $this->exec('INSERT INTO "' . $this->prefix . $table . '" (' . implode(', ', $columns) . ') VALUES (' . implode($values, ', ') . ')');
+        } else {
+            parent::insert($table, $datas);
             $this->lastSql = $this->last_query();
             $this->lastError = $this->error();
-            $n += $re;
+            if ($this->lastError[0] == '00000') {
+                $n = 1;
+            }
         }
         return $n;
     }

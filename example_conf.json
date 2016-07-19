@@ -4,11 +4,11 @@
   "connections": [
     {
       "name": "main",
-      "class": "DataPool\\Connections\\DatabaseConnection",
+      "class": "Wwtg99\\DataPool\\Connections\\DatabaseConnection",
       "mapper_path": "",
       "database": {
         "driver": "pgsql",
-        "dbname": "test2",
+        "dbname": "genobase_2",
         "host": "192.168.0.21",
         "username": "genobase",
         "password": "genobase",

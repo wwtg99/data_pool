@@ -6,11 +6,16 @@
  * Time: 17:05
  */
 
-namespace DataPool\Common;
+namespace Wwtg99\DataPool\Common;
 
 
 interface IDataEngine
 {
+
+    const KEY_FIELD = 'KEY';
+    const KEYDATA_FIELD = 'KEYDATA';
+    const FIELDS_FIELD = 'FIELDS';
+    const PAGE_FIELD = 'PAGE';
 
     /**
      * @param $name
@@ -89,6 +94,11 @@ interface IDataEngine
      * @return IDataEngine
      */
     public function init($config);
+
+    /**
+     * @return IDataEngine
+     */
+    public function close();
 
     /**
      * @return array

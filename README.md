@@ -5,6 +5,7 @@
 ### Usage
 
 - Configure conf file
+
 ```
 {
   "log_dir": "log",
@@ -12,14 +13,14 @@
   "connections": [
     {
       "name": "main",
-      "class": "DataPool\\Connections\\DatabaseConnection",
+      "class": "Wwtg99\\DataPool\\Connections\\DatabaseConnection",
       "mapper_path": "",
       "database": {
         "driver": "pgsql",
-        "dbname": "test2",
+        "dbname": "test",
         "host": "192.168.0.21",
-        "username": "genobase",
-        "password": "genobase",
+        "username": "user",
+        "password": "pwd",
         "port": 5432
       },
       "logger": {
@@ -31,21 +32,40 @@
   ]
 }
 ```
+
 - Use conf file to create data pool
+
 ```
 $pool = new DefaultDataPool('example_conf.json');
 ```
+
 - Get connection
+
 ```
 $conn = $pool->getConnection('main');
 ```
+- Define data mapper
+
+```
+namespace test;
+
+class TestMapper extends ArrayMapper
+{
+    protected $name = 'table_name';// table name
+    protected $key = 'id';//table key (string or array)
+}
+```
+
 - Get data mapper for query
+
 ```
 $mapper = $conn->getMapper('test\TestMapper'); //mapper should implement IDataMapper
 $re = $mapper->select('*', ['panel__id'=>'1']);
 var_dump($re);
 ```
+
 - Use pagination
+
 ```
 $mapper->setContext(['page'=>2, 'page_size'=>10]);
 $re = $mapper->search('1', ['name']);

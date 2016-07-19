@@ -6,7 +6,7 @@
  * Time: 17:09
  */
 
-namespace DataPool\Common;
+namespace Wwtg99\DataPool\Common;
 
 
 interface IDataMapper
@@ -17,6 +17,11 @@ interface IDataMapper
      * @return IDataMapper
      */
     public function setEnvironment($environment);
+
+    /**
+     * @return IDataConnection
+     */
+    public function getEnvironment();
 
     /**
      * @param array $context
@@ -47,6 +52,8 @@ interface IDataMapper
     public function select($select = null, $where = null);
 
     /**
+     * Get one data by key or where.
+     *
      * @param $key
      * @param $select
      * @param $where
@@ -61,11 +68,14 @@ interface IDataMapper
     public function insert($data);
 
     /**
+     * Update data by key or where.
+     *
      * @param $data
      * @param $where
+     * @param $key
      * @return mixed
      */
-    public function update($data, $where);
+    public function update($data, $where = null, $key = null);
 
     /**
      * @param $key

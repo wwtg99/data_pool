@@ -6,10 +6,10 @@
  * Time: 17:16
  */
 
-namespace DataPool\Engines;
+namespace Wwtg99\DataPool\Engines;
 
 
-use DataPool\Common\IDataEngine;
+use Wwtg99\DataPool\Common\IDataEngine;
 
 abstract class HandlerEngine implements IDataEngine
 {
@@ -26,7 +26,7 @@ abstract class HandlerEngine implements IDataEngine
      */
     public function registerHandler($name, $handler)
     {
-        if (array_key_exists($name, $this->handlers)) {
+        if (isset($this->handlers[$name])) {
             if (is_array($this->handlers[$name])) {
                 array_push($this->handlers[$name], $handler);
             } else {
@@ -56,7 +56,7 @@ abstract class HandlerEngine implements IDataEngine
      */
     protected function handle($name, $data)
     {
-        if (array_key_exists($name, $this->handlers)) {
+        if (isset($this->handlers[$name])) {
             $f = $this->handlers[$name];
             $context = ['event'=>$name, 'class'=>get_class($this)];
             if (is_array($f)) {

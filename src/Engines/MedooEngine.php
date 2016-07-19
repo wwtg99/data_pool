@@ -6,12 +6,12 @@
  * Time: 17:13
  */
 
-namespace DataPool\Engines;
+namespace Wwtg99\DataPool\Engines;
 
 
-use DataPool\Common\IDataEngine;
-use DataPool\Common\Message;
-use DataPool\Utils\Pagination;
+use Wwtg99\DataPool\Common\IDataEngine;
+use Wwtg99\DataPool\Common\Message;
+use Wwtg99\DataPool\Utils\Pagination;
 
 class MedooEngine extends HandlerEngine
 {
@@ -35,15 +35,6 @@ class MedooEngine extends HandlerEngine
      * @var array
      */
     protected $last_error = [];
-
-    /**
-     * MedooEngine constructor.
-     * @param array $config
-     */
-    public function __construct($config)
-    {
-        $this->init($config);
-    }
 
     /**
      * @param $name
@@ -124,6 +115,7 @@ class MedooEngine extends HandlerEngine
      */
     public function update($name, $data, $where)
     {
+        $where = $this->formatKey($where);
         $re = $this->medoo->update($name, $data, $where);
         $this->last_sql = $this->medoo->getLastSql();
         $this->last_error = $this->medoo->getLastError();
@@ -223,33 +215,54 @@ class MedooEngine extends HandlerEngine
 
     /**
      * @param array $config
-     * @return IDataEngine
+     * @return $this
+     * @throws \Exception
      */
     public function init($config)
     {
+        if (!isset($config['database'])) {
+            $msg = Message::messageList(6);
+            throw $msg->getException();
+        }
         $c = $config['database'];
+        $def_conf = [
+            'driver'=>'',
+            'dbname'=>'',
+            'host'=>'',
+            'username'=>'',
+            'password'=>'',
+            'charset'=>'utf8',
+            'prefix'=>'',
+            'option'=>null
+        ];
+        $c = array_merge($def_conf, $c);
         $db_conf = [
             'database_type' => $c['driver'],
             'database_name' => $c['dbname'],
-            'server' => isset($c['host']) ? $c['host'] : null,
-            'username' => isset($c['username']) ? $c['username'] : null,
-            'password' => isset($c['password']) ? $c['password'] : null,
-            'port' => isset($c['port']) ? $c['port'] : null,
-            'charset' => isset($c['charset']) ? $c['charset'] : 'utf8',
+            'server' => $c['host'],
+            'username' => $c['username'],
+            'password' => $c['password'],
+            'port' => $c['port'],
+            'charset' => $c['charset'],
+            'prefix' => $c['prefix'],
+            'option' => $c['option']
         ];
         if (array_key_exists('database_file', $c)) {
             $db_conf['database_file'] = $c['database_file'];
-        }
-        if (array_key_exists('option', $c)) {
-            $db_conf['option'] = $c['option'];
-        }
-        if (array_key_exists('prefix', $c)) {
-            $db_conf['prefix'] = $c['prefix'];
         }
         if (array_key_exists('debug', $c)) {
             $this->debug = $config['debug'];
         }
         $this->medoo = new MedooPlus($db_conf);
+        return $this;
+    }
+
+    /**
+     * @return IDataEngine
+     */
+    public function close()
+    {
+        return $this;
     }
 
     /**
@@ -257,7 +270,7 @@ class MedooEngine extends HandlerEngine
      */
     public function getLastError()
     {
-        return $this->medoo->getLastError();
+        return $this->last_error;
     }
 
     /**
@@ -265,7 +278,7 @@ class MedooEngine extends HandlerEngine
      */
     public function getLastQuery()
     {
-        return $this->medoo->getLastSql();
+        return $this->last_sql;
     }
 
     /**
@@ -275,17 +288,17 @@ class MedooEngine extends HandlerEngine
      */
     protected function formatKey($where)
     {
-        if (isset($where['KEY'])) {
-            $key = $where['KEY'];
-            unset($where['KEY']);
+        if (isset($where[self::KEY_FIELD])) {
+            $key = $where[self::KEY_FIELD];
+            unset($where[self::KEY_FIELD]);
         }
-        if (isset($where['KEYDATA'])) {
-            $keydata = $where['KEYDATA'];
-            unset($where['KEYDATA']);
+        if (isset($where[self::KEYDATA_FIELD])) {
+            $keydata = $where[self::KEYDATA_FIELD];
+            unset($where[self::KEYDATA_FIELD]);
         }
-        if (isset($where['FIELDS'])) {
-            $fields = $where['FIELDS'];
-            unset($where['FIELDS']);
+        if (isset($where[self::FIELDS_FIELD])) {
+            $fields = $where[self::FIELDS_FIELD];
+            unset($where[self::FIELDS_FIELD]);
         }
         if (isset($key) && isset($keydata)) {
             if (is_array($key) && is_array($keydata)) {
@@ -350,12 +363,12 @@ class MedooEngine extends HandlerEngine
      */
     protected function formatPage($where)
     {
-        if (isset($where['PAGE'])) {
-            $page = $where['PAGE'];
+        if (isset($where[self::PAGE_FIELD])) {
+            $page = $where[self::PAGE_FIELD];
             if ($page instanceof Pagination) {
                 $where['LIMIT'] = [$page->getOffset(), $page->getLimit()];
             }
-            unset($where['PAGE']);
+            unset($where[self::PAGE_FIELD]);
         }
         return $where;
     }

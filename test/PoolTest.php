@@ -13,15 +13,15 @@ class PoolTest extends PHPUnit_Framework_TestCase
     {
         date_default_timezone_set("Asia/Shanghai");
         require_once '../vendor/autoload.php';
-        require '../src/Utils/Loader.php';
-        \DataPool\Utils\Loader::getLoader();
+        $loader = new \Wwtg99\ClassLoader\Loader(__DIR__ . DIRECTORY_SEPARATOR . '..', [['Wwtg99\\DataPool', 'src', true]]);
+        $loader->autoload();
         require_once 'TestMapper.php';
         require_once 'MultiMapper.php';
     }
 
     public function test1()
     {
-        $pool = new \DataPool\Common\DefaultDataPool('../example_conf.json');
+        $pool = new \Wwtg99\DataPool\Common\DefaultDataPool('../example_conf.json');
         $this->assertNotNull($pool->getConnection('main'));
         $conn = $pool->getConnection('main');
         $this->assertEquals('main', $conn->getName());

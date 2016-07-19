@@ -6,13 +6,13 @@
  * Time: 17:31
  */
 
-namespace DataPool\Connections;
+namespace Wwtg99\DataPool\Connections;
 
 
-use DataPool\Common\IDataConnection;
-use DataPool\Common\IDataEngine;
-use DataPool\Common\IDataMapper;
-use DataPool\Common\Message;
+use Wwtg99\DataPool\Common\IDataConnection;
+use Wwtg99\DataPool\Common\IDataEngine;
+use Wwtg99\DataPool\Common\IDataMapper;
+use Wwtg99\DataPool\Common\Message;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 
@@ -78,7 +78,7 @@ abstract class MapperConnection implements IDataConnection
                     $name = $this->mapper_path . '\\' . $name;
                 }
                 $rc = new \ReflectionClass($name);
-                if ($rc->implementsInterface('\DataPool\Common\IDataMapper')) {
+                if ($rc->implementsInterface('\Wwtg99\DataPool\Common\IDataMapper')) {
                     $ins = $rc->newInstance();
                     if ($ins instanceof IDataMapper) {
                         $ins->setEnvironment($this);
@@ -109,7 +109,7 @@ abstract class MapperConnection implements IDataConnection
      */
     public function init($config)
     {
-        if (array_key_exists('name', $config)) {
+        if (isset($config['name'])) {
             $this->name = $config['name'];
         } else {
             $msg = Message::messageList(3);
@@ -129,10 +129,10 @@ abstract class MapperConnection implements IDataConnection
      */
     protected function initEngine($config)
     {
-        if (array_key_exists('engine', $config)) {
+        if (isset($config['engine'])) {
             $fc = new \ReflectionClass($config['engine']);
-            if ($fc->implementsInterface('\DataPool\Common\IDataEngine')) {
-                $this->engine = $fc->newInstance($config);
+            if ($fc->implementsInterface('\Wwtg99\DataPool\Common\IDataEngine')) {
+                $this->engine = $fc->newInstance();
                 $this->engine->init($config);
             } else {
                 $msg = Message::messageList(2);
@@ -146,15 +146,15 @@ abstract class MapperConnection implements IDataConnection
      */
     protected function initLog($config)
     {
-        if (array_key_exists('logger', $config)) {
+        if (isset($config['logger'])) {
             $c = $config['logger'];
             $logger = new Logger($this->getName());
-            $level = array_key_exists('level', $c) ? $c['level'] : '';
+            $level = isset($c['level']) ? $c['level'] : '';
             $level = self::getLevel($level);
             $root_path = $config['root_path'];
             $logdir = $c['log_dir'];
-            $name = array_key_exists('title', $c) ? $c['title'] : ($this->getName() . ".log");
-            $max = array_key_exists('max_logfile', $c) ? $c['max_logfile'] : 10;
+            $name = isset($c['title']) ? $c['title'] : ($this->getName() . ".log");
+            $max = isset($c['max_logfile']) ? $c['max_logfile'] : 10;
             $handler = new RotatingFileHandler(implode(DIRECTORY_SEPARATOR, [$root_path, $logdir, $name]), $max, $level, true, 0777);
             $logger->pushHandler($handler);
             $this->logger = $logger;

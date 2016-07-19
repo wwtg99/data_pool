@@ -6,7 +6,7 @@
  * Time: 15:52
  */
 
-namespace DataPool\Common;
+namespace Wwtg99\DataPool\Common;
 
 
 class DefaultDataPool implements IDataPool
@@ -39,10 +39,8 @@ class DefaultDataPool implements IDataPool
         }
         if (is_array($conf)) {
             $conf['root_path'] = $root_path;
-            $this->config($conf);
-        } else {
-            $this->init($conf);
         }
+        $this->init($conf);
     }
 
     /**
@@ -74,54 +72,63 @@ class DefaultDataPool implements IDataPool
                         return $c;
                     }
                 }
-
             }
         }
         return null;
     }
 
     /**
-     * @param array $config
-     * @return IDataPool
-     * @throws \Exception
+     * @inheritdoc
      */
     public function config($config)
     {
-        $root_path = isset($config['root_path']) ? $config['root_path'] : realpath(implode(DIRECTORY_SEPARATOR, [__DIR__, '..', '..']));
-        $map_path = isset($config['mapper_path']) ? $config['mapper_path'] : '';
-        $log_dir = isset($config['log_dir']) ? $config['log_dir'] : __DIR__;
-        $debug = isset($config['debug']) ? boolval($config['debug']) : false;
-        if (array_key_exists('connections', $config)) {
-            foreach ($config['connections'] as $connection) {
-                $name = $connection['name'];
-                $cls = $connection['class'];
-                $connection['debug'] = $debug;
+        $def_conf = [
+            'root_path'=>realpath(implode(DIRECTORY_SEPARATOR, [__DIR__, '..', '..'])),
+            'mapper_path'=>'',
+            'log_dir'=>__DIR__,
+            'debug'=>false,
+            'connections'=>[]
+        ];
+        $conf = array_merge($def_conf, $config);
+        $root_path = $conf['root_path'];
+        $map_path = $conf['mapper_path'];
+        $log_dir = $conf['log_dir'];
+        $debug = boolval($conf['debug']);
+        foreach ($conf['connections'] as $connection) {
+            $name = $connection['name'];
+            $cls = $connection['class'];
+            $connection['debug'] = $debug;
+            if (!isset($connection['root_path'])) {
                 $connection['root_path'] = $root_path;
-                if (isset($connection['logger'])) {
+            }
+            if (!isset($connection['mapper_path'])) {
+                $connection['mapper_path'] = $map_path;
+            }
+            if (isset($connection['logger'])) {
+                if (!isset($connection['logger']['log_dir'])) {
                     $connection['logger']['log_dir'] = $log_dir;
                 }
-                if (!isset($connection['mapper_path'])) {
-                    $connection['mapper_path'] = $map_path;
-                }
-                $this->configs[$name] = $connection;
-                $this->connections[$name] = new \ReflectionClass($cls);
             }
-        } else {
-            $msg = Message::messageList(1);
-            throw $msg->getException();
+            $this->configs[$name] = $connection;
+            $this->connections[$name] = new \ReflectionClass($cls);
         }
         return $this;
     }
 
     /**
-     * @param $conf
-     * @return IDataPool
+     * @inheritdoc
      */
     public function init($conf)
     {
-        $f = file_get_contents($conf);
-        $obj = json_decode($f, true);
-        $this->config($obj);
+        if (is_array($conf)) {
+            return $this->config($conf);
+        } else {
+            if (file_exists($conf)) {
+                $f = file_get_contents($conf);
+                $obj = json_decode($f, true);
+                return $this->config($obj);
+            }
+        }
         return $this;
     }
 

@@ -6,7 +6,7 @@
  * Time: 15:54
  */
 
-namespace DataPool\Common;
+namespace Wwtg99\DataPool\Common;
 
 
 interface IDataConnection
@@ -18,7 +18,7 @@ interface IDataConnection
     public function getName();
 
     /**
-     * Called before each getConnection().
+     * Called in each getConnection().
      * @return mixed
      */
     public function connect();

@@ -6,7 +6,7 @@
  * Time: 9:49
  */
 
-namespace DataPool\Common;
+namespace Wwtg99\DataPool\Common;
 
 
 class Message
@@ -89,6 +89,7 @@ class Message
             case 3: $msg = 'No name for connection!'; break;
             case 4: $msg = 'No mapper found!'; break;
             case 5: $msg = 'Invalid key data!'; break;
+            case 6: $msg = 'Invalid key database'; break;
             default: $msg = ''; $code = 0; break;
         }
         return new Message($code, $msg);

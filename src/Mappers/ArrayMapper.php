@@ -6,19 +6,20 @@
  * Time: 17:15
  */
 
-namespace DataPool\Mappers;
+namespace Wwtg99\DataPool\Mappers;
 
 
-use DataPool\Common\IDataConnection;
-use DataPool\Common\IDataMapper;
-use DataPool\Utils\Pagination;
+use Wwtg99\DataPool\Common\IDataConnection;
+use Wwtg99\DataPool\Common\IDataEngine;
+use Wwtg99\DataPool\Common\IDataMapper;
+use Wwtg99\DataPool\Utils\Pagination;
 
 abstract class ArrayMapper implements IDataMapper
 {
     /**
      * @var IDataConnection
      */
-    protected $connnection;
+    protected $connection;
 
     /**
      * @var array
@@ -41,8 +42,16 @@ abstract class ArrayMapper implements IDataMapper
      */
     public function setEnvironment($environment)
     {
-        $this->connnection = $environment;
+        $this->connection = $environment;
         return $this;
+    }
+
+    /**
+     * @return IDataConnection
+     */
+    public function getEnvironment()
+    {
+        return $this->connection;
     }
 
     /**
@@ -93,18 +102,20 @@ abstract class ArrayMapper implements IDataMapper
             if ($page) {
                 $p = Pagination::createFromPage($page, $pageSize, $topage);
                 if (is_null($where)) {
-                    $where = ['PAGE'=>$p];
+                    $where = [IDataEngine::PAGE_FIELD=>$p];
                 } else {
-                    $where['PAGE'] = $p;
+                    $where[IDataEngine::PAGE_FIELD] = $p;
                 }
             }
         }
-        $re = $this->connnection->getEngine()->select($this->getTableName(), $select, $where);
+        $re = $this->connection->getEngine()->select($this->getTableName(), $select, $where);
         $this->setContext(null);
         return $re;
     }
 
     /**
+     * Get one data by key or where.
+     *
      * @param $key
      * @param $select
      * @param $where
@@ -114,13 +125,13 @@ abstract class ArrayMapper implements IDataMapper
     {
         if (!is_null($key)) {
             if (is_array($where)) {
-                $where['KEY'] = $this->getTableKey();
-                $where['KEYDATA'] = $key;
+                $where[IDataEngine::KEY_FIELD] = $this->getTableKey();
+                $where[IDataEngine::KEYDATA_FIELD] = $key;
             } else {
-                $where = ['KEY' => $this->getTableKey(), 'KEYDATA' => $key];
+                $where = [IDataEngine::KEY_FIELD => $this->getTableKey(), IDataEngine::KEYDATA_FIELD => $key];
             }
         }
-        $re = $this->connnection->getEngine()->get($this->getTableName(), $select, $where);
+        $re = $this->connection->getEngine()->get($this->getTableName(), $select, $where);
         $this->setContext(null);
         return $re;
     }
@@ -131,7 +142,7 @@ abstract class ArrayMapper implements IDataMapper
      */
     public function insert($data)
     {
-        $re = $this->connnection->getEngine()->insert($this->getTableName(), $data);
+        $re = $this->connection->getEngine()->insert($this->getTableName(), $data);
         $this->setContext(null);
         return $re;
     }
@@ -139,11 +150,20 @@ abstract class ArrayMapper implements IDataMapper
     /**
      * @param $data
      * @param $where
+     * @param $key
      * @return mixed
      */
-    public function update($data, $where)
+    public function update($data, $where = null, $key = null)
     {
-        $re = $this->connnection->getEngine()->update($this->getTableName(), $data, $where);
+        if (!is_null($key)) {
+            if (is_array($where)) {
+                $where[IDataEngine::KEY_FIELD] = $this->getTableKey();
+                $where[IDataEngine::KEYDATA_FIELD] = $key;
+            } else {
+                $where = [IDataEngine::KEY_FIELD => $this->getTableKey(), IDataEngine::KEYDATA_FIELD => $key];
+            }
+        }
+        $re = $this->connection->getEngine()->update($this->getTableName(), $data, $where);
         $this->setContext(null);
         return $re;
     }
@@ -156,9 +176,9 @@ abstract class ArrayMapper implements IDataMapper
     public function delete($key, $where = null)
     {
         if ($key) {
-            $where = ['KEY' => $this->getTableKey(), 'KEYDATA'=>$key];
+            $where = [IDataEngine::KEY_FIELD => $this->getTableKey(), IDataEngine::KEYDATA_FIELD=>$key];
         }
-        $re = $this->connnection->getEngine()->delete($this->getTableName(), $where);
+        $re = $this->connection->getEngine()->delete($this->getTableName(), $where);
         $this->setContext(null);
         return $re;
     }
@@ -169,7 +189,7 @@ abstract class ArrayMapper implements IDataMapper
      */
     public function has($where)
     {
-        $re = $this->connnection->getEngine()->has($this->getTableName(), $where);
+        $re = $this->connection->getEngine()->has($this->getTableName(), $where);
         $this->setContext(null);
         return $re;
     }
@@ -181,7 +201,7 @@ abstract class ArrayMapper implements IDataMapper
      */
     public function count($select = null, $where = null)
     {
-        $re = $this->connnection->getEngine()->count($this->getTableName(), $select, $where);
+        $re = $this->connection->getEngine()->count($this->getTableName(), $select, $where);
         $this->setContext(null);
         return $re;
     }
@@ -201,16 +221,16 @@ abstract class ArrayMapper implements IDataMapper
             $topage = isset($this->context['to_page']) ? $this->context['to_page'] : null;
             if ($page) {
                 $p = Pagination::createFromPage($page, $pageSize, $topage);
-                $where['PAGE'] = $p;
+                $where[IDataEngine::PAGE_FIELD] = $p;
             }
         }
-        $where['KEYDATA'] = $term;
+        $where[IDataEngine::KEYDATA_FIELD] = $term;
         if ($fields) {
-            $where['FIELDS'] = $fields;
+            $where[IDataEngine::FIELDS_FIELD] = $fields;
         } else {
-            $where['FIELDS'] = $this->getTableKey();
+            $where[IDataEngine::FIELDS_FIELD] = $this->getTableKey();
         }
-        $re = $this->connnection->getEngine()->select($this->getTableName(), $select, $where);
+        $re = $this->connection->getEngine()->select($this->getTableName(), $select, $where);
         $this->setContext(null);
         return $re;
     }

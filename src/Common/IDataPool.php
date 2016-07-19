@@ -6,7 +6,7 @@
  * Time: 15:51
  */
 
-namespace DataPool\Common;
+namespace Wwtg99\DataPool\Common;
 
 
 interface IDataPool
@@ -28,9 +28,9 @@ interface IDataPool
     public function config($config);
 
     /**
-     * Initialize pool with conf file.
+     * Initialize pool with conf file or array.
      *
-     * @param $conf
+     * @param string|array $conf
      * @return IDataPool
      */
     public function init($conf);

@@ -9,7 +9,7 @@
 namespace test;
 
 
-use DataPool\Mappers\ArrayMapper;
+use Wwtg99\DataPool\Mappers\ArrayMapper;
 
 class TestMapper extends ArrayMapper
 {

@@ -6,7 +6,7 @@
  * Time: 13:06
  */
 
-namespace DataPool\Utils;
+namespace Wwtg99\DataPool\Utils;
 
 
 class Pagination

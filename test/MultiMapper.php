@@ -6,7 +6,7 @@
  * Date: 2016/6/20
  * Time: 12:14
  */
-class MultiMapper extends \DataPool\Mappers\ArrayMapper
+class MultiMapper extends \Wwtg99\DataPool\Mappers\ArrayMapper
 {
 
     protected $name = 'phenotype_all';

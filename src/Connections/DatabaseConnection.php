@@ -6,11 +6,10 @@
  * Time: 15:58
  */
 
-namespace DataPool\Connections;
+namespace Wwtg99\DataPool\Connections;
 
-
-use DataPool\Common\IDataConnection;
-use DataPool\Engines\MedooEngine;
+use Wwtg99\DataPool\Common\IDataConnection;
+use Wwtg99\DataPool\Engines\MedooEngine;
 
 class DatabaseConnection extends MapperConnection
 {
@@ -22,7 +21,6 @@ class DatabaseConnection extends MapperConnection
     {
         return $this->engine->query($query);
     }
-
 
     /**
      * @return mixed
@@ -41,7 +39,7 @@ class DatabaseConnection extends MapperConnection
     {
         parent::init($config);
         if (!$this->engine) {
-            $this->engine = new MedooEngine($config);
+            $this->engine = new MedooEngine();
             $this->engine->init($config);
         }
         $debug = $this->debug;
@@ -51,6 +49,7 @@ class DatabaseConnection extends MapperConnection
                 $this->logger->error('Error for query ' . $this->engine->getLastQuery(), $context);
             }
             if ($debug) {
+                $context['error'] = $this->engine->getLastError();
                 $this->logger->info('Query ' . $this->engine->getLastQuery(), $context);
             }
             return $data;
@@ -71,6 +70,9 @@ class DatabaseConnection extends MapperConnection
      */
     public function close()
     {
+        if ($this->engine) {
+            $this->engine->close();
+        }
         return $this;
     }
 
