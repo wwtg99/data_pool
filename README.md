@@ -76,7 +76,7 @@ var_dump($re);
 - select($select, $where)
 - get($key, $select, $where)
 - insert($data)
-- update($data, $where)
+- update($data, $where, $key)
 - delete($key, $where)
 - has($where)
 - count($select, $where)

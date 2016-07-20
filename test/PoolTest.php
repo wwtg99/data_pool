@@ -58,4 +58,89 @@ class PoolTest extends PHPUnit_Framework_TestCase
         $re = $mapper2->search('1', ['phenotype_id', 'rule_version', 'name']);
         $this->assertTrue($re !== false);
     }
+
+    public function testFormat()
+    {
+        //datetime
+        $dateFields = [
+            ['2016-01-10 10:12:15', null, '2016-01-10 10:12:15'],
+            ['2016-01-10 10:12:15', 'Y-m-d', '2016-01-10'],
+            ['2016-01-10 10:12:15', 'H:i:s', '10:12:15'],
+            ['2016-07-05 16:59:53.086167+08', null, '2016-07-05 16:59:53'],
+            ['2016-07-05 16:59:53.086167+08', 'Y-m-d', '2016-07-05'],
+            ['2016-07-05 16:59:53.086167+08', 'H:i:s', '16:59:53'],
+            [null, null, null],
+        ];
+        foreach ($dateFields as $dateField) {
+            if ($dateField[1]) {
+                $d = \Wwtg99\DataPool\Utils\FieldFormatter::formatDateTimeField($dateField[0], $dateField[1]);
+                $this->assertEquals($dateField[2], $d);
+            } else {
+                $d = \Wwtg99\DataPool\Utils\FieldFormatter::formatDateTimeField($dateField[0]);
+                $this->assertEquals($dateField[2], $d);
+            }
+        }
+        $data = [
+            ['f1'=>'aa', 'f2'=>'1999-05-06', 'f3_at'=>'2016-07-01 16:59:53.083112+08', 'created_at'=>'2016-07-25 16:59:00'],
+            ['created_at'=>null, 'updated_at'=>'2016-07-25 16:59:00', 'name'=>'aag'],
+        ];
+        $data_exp = [
+            ['f1'=>'aa', 'f2'=>'1999-05-06', 'f3_at'=>'2016-07-01 16:59:53', 'created_at'=>'2016-07-25 16:59:00'],
+            ['created_at'=>null, 'updated_at'=>'2016-07-25 16:59:00', 'name'=>'aag'],
+        ];
+        $res = \Wwtg99\DataPool\Utils\FieldFormatter::formatDateTime($data);
+        $this->assertEquals($data_exp, $res);
+        //number
+        $numFields = [
+            ['100', 0, PHP_ROUND_HALF_UP, 100],
+            ['100.123', 0, PHP_ROUND_HALF_UP, 100],
+            [12.34, 0, PHP_ROUND_HALF_UP, 12],
+            [12.34, 1, PHP_ROUND_HALF_UP, 12.3],
+            [12.3456, 2, PHP_ROUND_HALF_UP, 12.35],
+            ['23.689', 2, PHP_ROUND_HALF_UP, 23.69],
+            ['23.685', 2, PHP_ROUND_HALF_DOWN, 23.68],
+        ];
+        foreach ($numFields as $numField) {
+            $re = \Wwtg99\DataPool\Utils\FieldFormatter::formatNumberField($numField[0], $numField[1], $numField[2]);
+            $this->assertEquals($numField[3], $re);
+        }
+        $data = [
+            ['num'=>'123.45', 'numa'=>'12345.6', 'nuu'=>'aa'],
+            ['num'=>12.3, 'numa'=>12.34, 'nuu'=>'aab'],
+        ];
+        $data_exp = [
+            ['num'=>123, 'numa'=>'12345.6', 'nuu'=>'aa'],
+            ['num'=>12, 'numa'=>12.34, 'nuu'=>'aab'],
+        ];
+        $res = \Wwtg99\DataPool\Utils\FieldFormatter::formatNumber($data);
+        $this->assertEquals($data_exp, $res);
+        $data1 = [
+            ['num'=>'12.345', 'val'=>56.78, 'created_at'=>'2016-12-12 10:12:14', 'name'=>'aa'],
+            ['num'=>'12.345', 'val'=>'56.78', 'created_at'=>'2016-12-12 10:12:14.089176+08', 'name'=>'aa'],
+        ];
+        $setting1 = [
+            'format_datetime'=>['format'=>'Y-m-d'],
+            'format_number'=>['fields'=>['num', 'val'], 'precision'=>2]
+        ];
+        $data_exp1 = [
+            ['num'=>12.35, 'val'=>56.78, 'created_at'=>'2016-12-12', 'name'=>'aa'],
+            ['num'=>12.35, 'val'=>56.78, 'created_at'=>'2016-12-12', 'name'=>'aa'],
+        ];
+        \Wwtg99\DataPool\Utils\FieldFormatter::formatFields($data1, $setting1);
+        $this->assertEquals($data_exp1, $data1);
+        $data2 = [
+            ['num'=>'12.345', 'val'=>56.78, 'created_at'=>'2016-12-12 10:12:14', 'name'=>'aa'],
+            ['num'=>'12.345', 'val'=>'56.78', 'created_at'=>'2016-12-12 10:12:14.089176+08', 'name'=>'aa'],
+        ];
+        $setting2 = [
+            'format_datetime'=>[],
+            'format_number'=>[]
+        ];
+        $data_exp2 = [
+            ['num'=>12, 'val'=>56.78, 'created_at'=>'2016-12-12 10:12:14', 'name'=>'aa'],
+            ['num'=>12, 'val'=>'56.78', 'created_at'=>'2016-12-12 10:12:14', 'name'=>'aa'],
+        ];
+        \Wwtg99\DataPool\Utils\FieldFormatter::formatFields($data2, $setting2);
+        $this->assertEquals($data_exp2, $data2);
+    }
 }

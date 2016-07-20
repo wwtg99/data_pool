@@ -3,6 +3,7 @@
 - Use wwtg99/class_loader instead of Loader
 - Add key in IDataMapper update
 - Optimize connection and engine
+- Add FieldFormatter
 
 ## 0.1.0
 - Start project

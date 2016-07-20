@@ -44,6 +44,8 @@ abstract class MapperConnection implements IDataConnection
     protected $config = [];
 
     /**
+     * Prefix for all mappers.
+     *
      * @var string
      */
     protected $mapper_path;
