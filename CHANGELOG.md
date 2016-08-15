@@ -1,3 +1,6 @@
+## 0.1.5
+- Add prepend_mapper_path in MapperConnection to ignore mapper_path
+
 ## 0.1.4
 - Add ArrayPgInsertMapper
 
