@@ -56,6 +56,11 @@ abstract class MapperConnection implements IDataConnection
     protected $debug = false;
 
     /**
+     * @var bool
+     */
+    public $prepend_mapper_path = true;
+
+    /**
      * @return string
      */
     public function getName()
@@ -76,7 +81,7 @@ abstract class MapperConnection implements IDataConnection
             }
         } else {
             try {
-                if ($this->mapper_path) {
+                if ($this->prepend_mapper_path && $this->mapper_path) {
                     $name = $this->mapper_path . '\\' . $name;
                 }
                 $rc = new \ReflectionClass($name);
