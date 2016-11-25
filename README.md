@@ -72,6 +72,13 @@ $re = $mapper->search('1', ['name']);
 var_dump($re);
 ```
 
+- Use order
+```
+$mapper->setContext(['order'=>'+field1,-field2']);
+$re = $mapper->search('1', ['name']);
+var_dump($re);
+```
+
 ### Methods to query
 - select($select, $where)
 - get($key, $select, $where)

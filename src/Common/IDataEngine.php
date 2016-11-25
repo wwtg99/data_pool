@@ -16,6 +16,7 @@ interface IDataEngine
     const KEYDATA_FIELD = 'KEYDATA';
     const FIELDS_FIELD = 'FIELDS';
     const PAGE_FIELD = 'PAGE';
+    const ORDER_FIELD = 'ORDER';
 
     /**
      * @param $name

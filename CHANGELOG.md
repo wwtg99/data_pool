@@ -1,3 +1,6 @@
+## 0.1.6
+- Support limit, offset and order in select and search
+
 ## 0.1.5
 - Add prepend_mapper_path in MapperConnection to ignore mapper_path
 

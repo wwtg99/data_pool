@@ -59,6 +59,21 @@ class PoolTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($re !== false);
     }
 
+    public function test2()
+    {
+        $pool = new \Wwtg99\DataPool\Common\DefaultDataPool('../example_conf.json');
+        $this->assertNotNull($pool->getConnection('main'));
+        $conn = $pool->getConnection('main');
+        $mapper = $conn->getMapper('test\TestMapper');
+        $this->assertNotNull($mapper);
+        $mapper->setContext(['page'=>2, 'page_size'=>2]);
+        $re = $mapper->select();
+        $this->assertEquals(2, count($re));
+        $mapper->setContext(['limit'=>5, 'offset'=>2, 'order'=>'-panel_id']);
+        $re = $mapper->select();
+        $this->assertEquals(5, count($re));
+    }
+
     public function testFormat()
     {
         //datetime

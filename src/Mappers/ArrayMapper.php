@@ -16,6 +16,14 @@ use Wwtg99\DataPool\Utils\Pagination;
 
 abstract class ArrayMapper implements IDataMapper
 {
+
+    const CONTEXT_PAGE = 'page';
+    const CONTEXT_PAGE_SIZE = 'page_size';
+    const CONTEXT_TO_PAGE = 'to_page';
+    const CONTEXT_LIMIT = 'limit';
+    const CONTEXT_OFFSET = 'offset';
+    const CONTEXT_ORDER = 'order';
+
     /**
      * @var IDataConnection
      */
@@ -96,15 +104,20 @@ abstract class ArrayMapper implements IDataMapper
     public function select($select = null, $where = null)
     {
         if ($this->getContext()) {
-            $page = isset($this->context['page']) ? $this->context['page'] : null;
-            $pageSize = isset($this->context['page_size']) ? $this->context['page_size'] : 100;
-            $topage = isset($this->context['to_page']) ? $this->context['to_page'] : null;
-            if ($page) {
-                $p = Pagination::createFromPage($page, $pageSize, $topage);
+            $p = $this->getPagination();
+            if ($p) {
                 if (is_null($where)) {
                     $where = [IDataEngine::PAGE_FIELD=>$p];
                 } else {
                     $where[IDataEngine::PAGE_FIELD] = $p;
+                }
+            }
+            $order = $this->getOrder();
+            if ($order) {
+                if (is_null($where)) {
+                    $where = [IDataEngine::ORDER_FIELD=>$order];
+                } else {
+                    $where[IDataEngine::ORDER_FIELD] = $order;
                 }
             }
         }
@@ -216,12 +229,13 @@ abstract class ArrayMapper implements IDataMapper
     {
         $where = [];
         if ($this->getContext()) {
-            $page = isset($this->context['page']) ? $this->context['page'] : null;
-            $pageSize = isset($this->context['page_size']) ? $this->context['page_size'] : 100;
-            $topage = isset($this->context['to_page']) ? $this->context['to_page'] : null;
-            if ($page) {
-                $p = Pagination::createFromPage($page, $pageSize, $topage);
+            $p = $this->getPagination();
+            if ($p) {
                 $where[IDataEngine::PAGE_FIELD] = $p;
+            }
+            $order = $this->getOrder();
+            if ($order) {
+                $where[IDataEngine::ORDER_FIELD] = $order;
             }
         }
         $where[IDataEngine::KEYDATA_FIELD] = $term;
@@ -260,6 +274,44 @@ abstract class ArrayMapper implements IDataMapper
             return $this->key;
         }
         return '';
+    }
+
+    /**
+     * @return null|Pagination
+     */
+    protected function getPagination()
+    {
+        if (isset($this->context[self::CONTEXT_PAGE])) {
+            $page = $this->context[self::CONTEXT_PAGE];
+            $pageSize = isset($this->context[self::CONTEXT_PAGE_SIZE]) ? $this->context[self::CONTEXT_PAGE_SIZE] : 100;
+            $topage = isset($this->context[self::CONTEXT_TO_PAGE]) ? $this->context[self::CONTEXT_TO_PAGE] : null;
+            return Pagination::createFromPage($page, $pageSize, $topage);
+        } elseif (isset($this->context[self::CONTEXT_LIMIT])) {
+            $limit = $this->context[self::CONTEXT_LIMIT];
+            $offset = isset($this->context[self::CONTEXT_OFFSET]) ? $this->context[self::CONTEXT_OFFSET] : 0;
+            return new Pagination($limit, $offset);
+        }
+        return null;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getOrder()
+    {
+        $sort = [];
+        if (isset($this->context[self::CONTEXT_ORDER])) {
+            $order = $this->context[self::CONTEXT_ORDER];
+            $ods = explode(',', $order);
+            foreach ($ods as $sortf) {
+                if (substr($sortf, 0, 1) == '+') {
+                    $sort[substr($sortf, 1)] = 'ASC';
+                } elseif (substr($sortf, 0, 1) == '-') {
+                    $sort[substr($sortf, 1)] = 'DESC';
+                }
+            }
+        }
+        return $sort;
     }
 
 }
