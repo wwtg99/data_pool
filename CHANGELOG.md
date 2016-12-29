@@ -1,3 +1,6 @@
+## 0.1.7
+- Change sort to '>' and '<'
+
 ## 0.1.6
 - Support limit, offset and order in select and search
 

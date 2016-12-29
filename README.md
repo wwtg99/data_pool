@@ -73,8 +73,10 @@ var_dump($re);
 ```
 
 - Use order
+
+`>` for ascending, `<` for descending
 ```
-$mapper->setContext(['order'=>'+field1,-field2']);
+$mapper->setContext(['order'=>'>field1,<field2']);
 $re = $mapper->search('1', ['name']);
 var_dump($re);
 ```

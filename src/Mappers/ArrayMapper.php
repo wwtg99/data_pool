@@ -304,9 +304,9 @@ abstract class ArrayMapper implements IDataMapper
             $order = $this->context[self::CONTEXT_ORDER];
             $ods = explode(',', $order);
             foreach ($ods as $sortf) {
-                if (substr($sortf, 0, 1) == '+') {
+                if (substr($sortf, 0, 1) == '>') {
                     $sort[substr($sortf, 1)] = 'ASC';
-                } elseif (substr($sortf, 0, 1) == '-') {
+                } elseif (substr($sortf, 0, 1) == '<') {
                     $sort[substr($sortf, 1)] = 'DESC';
                 }
             }
