@@ -8,10 +8,10 @@
       "mapper_path": "",
       "database": {
         "driver": "pgsql",
-        "dbname": "genobase_test",
-        "host": "192.168.0.21",
-        "username": "genobase",
-        "password": "genobase",
+        "dbname": "test1",
+        "host": "192.168.83.128",
+        "username": "wwu",
+        "password": "1",
         "port": 5432
       },
       "logger": {

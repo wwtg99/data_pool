@@ -53,8 +53,8 @@ class Pagination
      */
     public function __construct($limit, $offset)
     {
-        $this->limit = $limit;
-        $this->offset = $offset;
+        $this->setLimit($limit);
+        $this->setOffset($offset);
     }
 
     /**
@@ -70,6 +70,9 @@ class Pagination
      */
     public function setLimit($limit)
     {
+        if ($limit < 0) {
+            $limit = 0;
+        }
         $this->limit = $limit;
     }
 
@@ -86,6 +89,9 @@ class Pagination
      */
     public function setOffset($offset)
     {
+        if ($offset < 0) {
+            $offset = 0;
+        }
         $this->offset = $offset;
     }
 

@@ -12,10 +12,29 @@ namespace Wwtg99\DataPool\Common;
 interface IDataEngine
 {
 
+    /**
+     * primary key
+     */
     const KEY_FIELD = 'KEY';
+
+    /**
+     * primary key data
+     */
     const KEYDATA_FIELD = 'KEYDATA';
+
+    /**
+     * fields for search
+     */
     const FIELDS_FIELD = 'FIELDS';
+
+    /**
+     * pagination
+     */
     const PAGE_FIELD = 'PAGE';
+
+    /**
+     * order by
+     */
     const ORDER_FIELD = 'ORDER';
 
     /**

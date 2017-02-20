@@ -1,3 +1,6 @@
+## 0.2.0
+- Update medoo to 1.2
+
 ## 0.1.7
 - Change sort to '>' and '<'
 

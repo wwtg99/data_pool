@@ -29,15 +29,15 @@ class MedooEngine extends HandlerEngine
     /**
      * @var string
      */
-    protected $last_sql = '';
+    protected $lastSql = '';
 
     /**
      * @var array
      */
-    protected $last_error = [];
+    protected $lastError = [];
 
     /**
-     * @param $name
+     * @param $name: table name or ['table':'', 'join':'']
      * @param $select
      * @param $where
      * @return mixed
@@ -54,8 +54,6 @@ class MedooEngine extends HandlerEngine
         } else {
             $re = $this->medoo->select($tb[0], $select, $where);
         }
-        $this->last_sql = $this->medoo->getLastSql();
-        $this->last_error = $this->medoo->getLastError();
         $re = $this->handle('select', $re);
         if ($re === false) {
             return false;
@@ -64,7 +62,7 @@ class MedooEngine extends HandlerEngine
     }
 
     /**
-     * @param $name
+     * @param $name: table name or ['table':'', 'join':'']
      * @param $select
      * @param $where
      * @return mixed
@@ -81,8 +79,6 @@ class MedooEngine extends HandlerEngine
         } else {
             $re = $this->medoo->get($tb[0], $select, $where);
         }
-        $this->last_sql = $this->medoo->getLastSql();
-        $this->last_error = $this->medoo->getLastError();
         $re = $this->handle('get', $re);
         if ($re === false) {
             return false;
@@ -98,8 +94,6 @@ class MedooEngine extends HandlerEngine
     public function insert($name, $data)
     {
         $re = $this->medoo->insert($name, $data);
-        $this->last_sql = $this->medoo->getLastSql();
-        $this->last_error = $this->medoo->getLastError();
         $re = $this->handle('insert', $re);
         if ($re === false) {
             return false;
@@ -117,8 +111,6 @@ class MedooEngine extends HandlerEngine
     {
         $where = $this->formatKey($where);
         $re = $this->medoo->update($name, $data, $where);
-        $this->last_sql = $this->medoo->getLastSql();
-        $this->last_error = $this->medoo->getLastError();
         $re = $this->handle('update', $re);
         if ($re === false) {
             return false;
@@ -135,8 +127,6 @@ class MedooEngine extends HandlerEngine
     {
         $where = $this->formatKey($where);
         $re = $this->medoo->delete($name, $where);
-        $this->last_sql = $this->medoo->getLastSql();
-        $this->last_error = $this->medoo->getLastError();
         $re = $this->handle('delete', $re);
         if ($re === false) {
             return false;
@@ -157,8 +147,6 @@ class MedooEngine extends HandlerEngine
         } else {
             $re = $this->medoo->has($tb[0], $where);
         }
-        $this->last_sql = $this->medoo->getLastSql();
-        $this->last_error = $this->medoo->getLastError();
         $re = $this->handle('has', $re);
         if ($re === false) {
             return false;
@@ -180,8 +168,6 @@ class MedooEngine extends HandlerEngine
         } else {
             $re = $this->medoo->count($tb[0], $where);
         }
-        $this->last_sql = $this->medoo->getLastSql();
-        $this->last_error = $this->medoo->getLastError();
         $re = $this->handle('count', $re);
         if ($re === false) {
             return false;
@@ -207,8 +193,6 @@ class MedooEngine extends HandlerEngine
         } else {
             $re = $this->medoo->query($query);
         }
-        $this->last_sql = $this->medoo->getLastSql();
-        $this->last_error = $this->medoo->getLastError();
         $re = $this->handle('query', $re);
         return $re;
     }
@@ -270,7 +254,7 @@ class MedooEngine extends HandlerEngine
      */
     public function getLastError()
     {
-        return $this->last_error;
+        return $this->medoo->getLastError();
     }
 
     /**
@@ -278,7 +262,7 @@ class MedooEngine extends HandlerEngine
      */
     public function getLastQuery()
     {
-        return $this->last_sql;
+        return $this->medoo->getLastSql();
     }
 
     /**

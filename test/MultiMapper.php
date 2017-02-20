@@ -9,13 +9,13 @@
 class MultiMapper extends \Wwtg99\DataPool\Mappers\ArrayMapper
 {
 
-    protected $name = 'phenotype_all';
+    protected $name = 'phenotypes';
 
-    protected $key = ['phenotype_id', 'rule_version'];
+    protected $key = ['pid', 'version'];
 
     /**
-     * @field phenotype_id text primary key
-     * @field rule_version text primary key
+     * @field pid text primary key
+     * @field version text primary key
      * @field name text
      */
 }

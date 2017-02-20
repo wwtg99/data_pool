@@ -9,7 +9,9 @@
 namespace Wwtg99\DataPool\Engines;
 
 
-class MedooPlus extends \medoo
+use Medoo\Medoo;
+
+class MedooPlus extends Medoo
 {
     /**
      * @var array
@@ -46,7 +48,7 @@ class MedooPlus extends \medoo
     public function select($table, $join, $columns = null, $where = null)
     {
         $re = parent::select($table, $join, $columns, $where);
-        $this->lastSql = $this->last_query();
+        $this->lastSql = $this->last();
         $this->lastError = $this->error();
         return $re;
     }
@@ -58,25 +60,10 @@ class MedooPlus extends \medoo
      */
     public function insert($table, $datas)
     {
-        $n = 0;
-        if (isset($datas[0])) {
-            foreach ($datas as $data) {
-                parent::insert($table, $data);
-                $this->lastSql = $this->last_query();
-                $this->lastError = $this->error();
-                if ($this->lastError[0] == '00000') {
-                    $n += 1;
-                }
-            }
-        } else {
-            parent::insert($table, $datas);
-            $this->lastSql = $this->last_query();
-            $this->lastError = $this->error();
-            if ($this->lastError[0] == '00000') {
-                $n = 1;
-            }
-        }
-        return $n;
+        $re = parent::insert($table, $datas);
+        $this->lastSql = $this->last();
+        $this->lastError = $this->error();
+        return $re;
     }
 
     /**
@@ -88,7 +75,7 @@ class MedooPlus extends \medoo
     public function update($table, $data, $where = null)
     {
         $re = parent::update($table, $data, $where);
-        $this->lastSql = $this->last_query();
+        $this->lastSql = $this->last();
         $this->lastError = $this->error();
         return $re;
     }
@@ -101,7 +88,7 @@ class MedooPlus extends \medoo
     public function delete($table, $where)
     {
         $re = parent::delete($table, $where);
-        $this->lastSql = $this->last_query();
+        $this->lastSql = $this->last();
         $this->lastError = $this->error();
         return $re;
     }
@@ -122,7 +109,7 @@ class MedooPlus extends \medoo
     public function get($table, $join = null, $column = null, $where = null)
     {
         $re = parent::get($table, $join, $column, $where);
-        $this->lastSql = $this->last_query();
+        $this->lastSql = $this->last();
         $this->lastError = $this->error();
         return $re;
     }
@@ -141,14 +128,15 @@ class MedooPlus extends \medoo
     public function has($table, $join, $where = null)
     {
         $column = null;
-        $re = $this->query('SELECT EXISTS(' . $this->select_context($table, $join, $column, $where, 1) . ')');
-        $this->lastSql = $this->last_query();
-        $this->lastError = $this->error();
-        if ($re) {
-            return $re->fetchColumn();
+        $query = $this->query('SELECT EXISTS(' . $this->selectContext($table, $join, $column, $where, 1) . ')');
+        if ($query) {
+            $re = ($query->fetchColumn() === true || ($query->fetchColumn() === '1'));
         } else {
-            return false;
+            $re = false;
         }
+        $this->lastSql = $this->last();
+        $this->lastError = $this->error();
+        return $re;
     }
 
     /**
@@ -166,7 +154,19 @@ class MedooPlus extends \medoo
     public function count($table, $join = null, $column = null, $where = null)
     {
         $re = parent::count($table, $join, $column, $where);
-        $this->lastSql = $this->last_query();
+        $this->lastSql = $this->last();
+        $this->lastError = $this->error();
+        return $re;
+    }
+
+    /**
+     * @param $query
+     * @return bool|\PDOStatement
+     */
+    public function query($query)
+    {
+        $re = parent::query($query);
+        $this->lastSql = $this->last();
         $this->lastError = $this->error();
         return $re;
     }
